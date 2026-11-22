@@ -5,32 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Parte Diario 2.0</title>
     <style>
-        /* RESET & BASE */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         body { background-color: #0f172a; color: #f8fafc; padding: 16px; padding-bottom: 48px; min-height: 100vh; }
         .container { max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 
-        /* EFECTO CRISTAL (GLASS) */
         .glass {
-            background: rgba(30, 41, 59, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1e293b;
+            border: 1px solid #334155;
             border-radius: 16px;
             padding: 16px;
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
         }
 
-        .border-highlight { border-color: rgba(16, 185, 129, 0.3); }
+        .border-highlight { border-color: #059669; }
 
-        /* ENCABEZADO */
         .header { display: flex; align-items: center; justify-content: space-between; }
         .header-left { display: flex; align-items: center; gap: 12px; }
         .icon-badge { width: 40px; height: 40px; border-radius: 50%; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; font-size: 20px; }
         .header-title { font-size: 16px; font-weight: 700; color: #ffffff; }
         .header-subtitle { font-size: 12px; color: #94a3b8; }
 
-        /* BOTONES PRINCIPALES */
         .btn-main {
             background-color: #10b981;
             color: #022c22;
@@ -40,35 +34,349 @@
             border: none;
             font-size: 13px;
             cursor: pointer;
-            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
         }
-        .btn-main:active { transform: scale(0.97); }
 
-        /* FORMULARIOS & INPUTS */
         .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
-        .form-group:last-child { margin-bottom: 0; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         
         label { font-size: 12px; color: #94a3b8; font-weight: 500; }
         input[type="text"], input[type="number"] {
             width: 100%;
-            background-color: rgba(15, 23, 42, 0.8);
+            background-color: #0f172a;
             border: 1px solid #334155;
             border-radius: 10px;
             padding: 10px 12px;
             color: #ffffff;
             font-size: 14px;
             outline: none;
-            color-scheme: dark;
         }
-        input:focus { border-color: #10b981; }
 
-        /* BOTONES DE SELECCIÓN Y RÁPIDOS */
         .btn-group { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
         .chip {
-            background-color: #1e293b;
+            background-color: #0f172a;
             border: 1px solid #334155;
             color: #cbd5e1;
             padding: 6px 10px;
             border-radius: 8px;
             font-size: 12px;
+            cursor: pointer;
+        }
+        .chip.selected { background-color: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #6ee7b7; }
+        .chip-green { background-color: #064e3b; border-color: #047857; color: #a7f3d0; }
+        .chip-gray { background-color: #334155; border-color: #475569; color: #f1f5f9; }
+
+        .btn-add {
+            width: 100%;
+            background-color: #0f172a;
+            border: 1px solid #10b981;
+            color: #34d399;
+            font-weight: 600;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            margin-top: 8px;
+            cursor: pointer;
+        }
+
+        .card-item {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .card-title { font-size: 13px; font-weight: 700; color: #f1f5f9; }
+        .card-sub { font-size: 11px; color: #94a3b8; }
+        .btn-del { background: none; border: none; font-size: 16px; cursor: pointer; }
+
+        pre {
+            background-color: #020617;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            padding: 12px;
+            font-size: 12px;
+            color: #cbd5e1;
+            white-space: pre-wrap;
+            font-family: monospace;
+            min-height: 100px;
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #10b981;
+            color: #022c22;
+            font-weight: 700;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 13px;
+            display: none;
+        }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="glass header">
+            <div class="header-left">
+                <div class="icon-badge">📋</div>
+                <div>
+                    <div class="header-title">Parte Diario 2.0</div>
+                    <div class="header-subtitle">Generador WhatsApp</div>
+                </div>
+            </div>
+            <button onclick="copiarReporte()" class="btn-main">✓ TODO LISTO</button>
+        </div>
+
+        <!-- Datos Fijos -->
+        <div class="glass">
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" id="nombre" value="Sebastián Rodríguez">
+            </div>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Fecha</label>
+                    <input type="text" id="fecha">
+                </div>
+                <div class="form-group">
+                    <label>Horas</label>
+                    <input type="number" id="horas" value="10">
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulario Pieza -->
+        <div class="glass border-highlight">
+            <div style="font-size: 13px; font-weight: 700; color: #34d399; margin-bottom: 10px;">
+                ➕ Agregar Pieza / Trabajo
+            </div>
+
+            <div class="form-group">
+                <label>Código / Nombre de Pieza</label>
+                <input type="text" id="pieza" placeholder="Ej: WW-8505801 o 1 brida de 1&quot;">
+            </div>
+
+            <div class="form-group">
+                <label>Ubicación</label>
+                <div class="btn-group" id="ubicacionBotones">
+                    <button type="button" class="chip" onclick="seleccionarUbicacion('Taller de pintura', this)">Taller de pintura</button>
+                    <button type="button" class="chip" onclick="seleccionarUbicacion('Taller de chorreo', this)">Taller de chorreo</button>
+                    <button type="button" class="chip" onclick="seleccionarUbicacion('otro', this)">Otro</button>
+                </div>
+                <input type="text" id="ubicacionOtro" placeholder="Escribe el área (Ej: Área Nº 40)" class="hidden" style="margin-top: 8px;">
+            </div>
+
+            <div class="form-group">
+                <label>Tareas Realizadas</label>
+                <input type="text" id="tareas" placeholder="Ej: Blíster + Pirulo + Imprimación">
+                
+                <div class="btn-group" style="margin-top: 8px;">
+                    <button type="button" class="chip" onclick="addTareaRapida('Chorreo')">+ Chorreo</button>
+                    <button type="button" class="chip" onclick="addTareaRapida('Lijado')">+ Lijado</button>
+                    <button type="button" class="chip" onclick="addTareaRapida('Pirulo')">+ Pirulo</button>
+                    <button type="button" class="chip" onclick="addTareaRapida('Blíster')">+ Blíster</button>
+                    <button type="button" class="chip" onclick="addTareaRapida('Imprimación')">+ Imprimación</button>
+                    <button type="button" class="chip" onclick="addTareaRapida('2º mano de Imprimación')">+ 2º Imprimación</button>
+                    <button type="button" class="chip" onclick="addTareaRapida('3º mano de Imprimación')">+ 3º Imprimación</button>
+                    <button type="button" class="chip chip-green" onclick="addTareaRapida('Pintado de color verde')">+ Pintura verde</button>
+                    <button type="button" class="chip chip-gray" onclick="addTareaRapida('Pintado de color gris')">+ Pintura gris</button>
+                </div>
+            </div>
+
+            <button type="button" class="btn-add" onclick="agregarPieza()">+ Añadir a la lista</button>
+        </div>
+
+        <!-- Lista Agregada -->
+        <div id="listaPiezas"></div>
+
+        <!-- Previsualización -->
+        <div class="glass">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 12px; color: #94a3b8; font-weight: 500;">Vista Previa para WhatsApp</span>
+                <span onclick="copiarReporte()" style="font-size: 12px; color: #34d399; cursor: pointer;">Copiar</span>
+            </div>
+            <pre id="preview"></pre>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast">✅ ¡Copiado al portapapeles!</div>
+
+    <script>
+        var piezasList = [];
+        var ubicacionSeleccionada = '';
+
+        function init() {
+            var hoy = new Date();
+            var dd = String(hoy.getDate());
+            if (dd.length < 2) dd = '0' + dd;
+            var mm = String(hoy.getMonth() + 1);
+            if (mm.length < 2) mm = '0' + mm;
+            var yyyy = hoy.getFullYear();
+            
+            var fechaInput = document.getElementById('fecha');
+            if (fechaInput) {
+                fechaInput.value = dd + '/' + mm + '/' + yyyy;
+            }
+
+            document.getElementById('nombre').oninput = render;
+            document.getElementById('fecha').oninput = render;
+            document.getElementById('horas').oninput = render;
+
+            render();
+        }
+
+        function seleccionarUbicacion(valor, btnElement) {
+            var botones = document.querySelectorAll('#ubicacionBotones .chip');
+            for(var i = 0; i < botones.length; i++) {
+                botones[i].className = 'chip';
+            }
+
+            var inputOtro = document.getElementById('ubicacionOtro');
+
+            if (ubicacionSeleccionada === valor && valor !== 'otro') {
+                ubicacionSeleccionada = '';
+                inputOtro.className = 'hidden';
+                inputOtro.value = '';
+            } else {
+                ubicacionSeleccionada = valor;
+                btnElement.className = 'chip selected';
+
+                if (valor === 'otro') {
+                    inputOtro.className = '';
+                    inputOtro.focus();
+                } else {
+                    inputOtro.className = 'hidden';
+                    inputOtro.value = '';
+                }
+            }
+        }
+
+        function getUbicacionActual() {
+            if (ubicacionSeleccionada === 'otro') {
+                return document.getElementById('ubicacionOtro').value.trim();
+            }
+            return ubicacionSeleccionada;
+        }
+
+        function addTareaRapida(texto) {
+            var input = document.getElementById('tareas');
+            if (input.value.trim() === '') {
+                input.value = texto;
+            } else {
+                input.value += ' + ' + texto;
+            }
+        }
+
+        function agregarPieza() {
+            var pieza = document.getElementById('pieza').value.trim();
+            var tareas = document.getElementById('tareas').value.trim();
+            var ubicacion = getUbicacionActual();
+
+            if (!pieza) {
+                alert('Escribe el código o descripción de la pieza');
+                return;
+            }
+
+            piezasList.push({ pieza: pieza, tareas: tareas, ubicacion: ubicacion });
+            document.getElementById('pieza').value = '';
+            document.getElementById('tareas').value = '';
+            
+            ubicacionSeleccionada = '';
+            document.getElementById('ubicacionOtro').value = '';
+            document.getElementById('ubicacionOtro').className = 'hidden';
+            
+            var botones = document.querySelectorAll('#ubicacionBotones .chip');
+            for(var i = 0; i < botones.length; i++) {
+                botones[i].className = 'chip';
+            }
+
+            render();
+        }
+
+        function eliminarPieza(index) {
+            piezasList.splice(index, 1);
+            render();
+        }
+
+        function generarTexto() {
+            var nombre = document.getElementById('nombre').value;
+            var fecha = document.getElementById('fecha').value;
+            var horas = document.getElementById('horas').value;
+
+            var texto = '📋 *REPORTE DIARIO DE TRABAJO*\n';
+            texto += '👤 *' + nombre + '* | 📅 ' + fecha + ' | ⏱️ ' + horas + 'h\n\n';
+
+            if (piezasList.length === 0) {
+                texto += '*(Agrega piezas arriba para ver el reporte)*';
+            } else {
+                for(var idx = 0; idx < piezasList.length; idx++) {
+                    var item = piezasList[idx];
+                    texto += '▪️ *' + item.pieza + '*\n';
+                    if (item.tareas) texto += '↳ *Tareas:* ' + item.tareas + '\n';
+                    if (item.ubicacion) texto += '📍 *Ubicación:* ' + item.ubicacion + '\n';
+                    if (idx < piezasList.length - 1) texto += '\n';
+                }
+            }
+
+            return texto.trim();
+        }
+
+        function render() {
+            var contenedor = document.getElementById('listaPiezas');
+            contenedor.innerHTML = '';
+            
+            for(var index = 0; index < piezasList.length; index++) {
+                var item = piezasList[index];
+                var card = document.createElement('div');
+                card.className = 'card-item';
+                var htmlCard = '<div><div class="card-title">' + item.pieza + '</div>';
+                htmlCard += '<div class="card-sub">' + (item.tareas || 'Sin tareas') + (item.ubicacion ? ' • ' + item.ubicacion : '') + '</div></div>';
+                htmlCard += '<button type="button" class="btn-del" onclick="eliminarPieza(' + index + ')">🗑️</button>';
+                card.innerHTML = htmlCard;
+                contenedor.appendChild(card);
+            }
+
+            document.getElementById('preview').innerText = generarTexto();
+        }
+
+        function copiarReporte() {
+            var texto = generarTexto();
+            var textArea = document.createElement("textarea");
+            textArea.value = texto;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                mostrarToast();
+            } catch (err) {
+                console.error('Error al copiar: ', err);
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        function mostrarToast() {
+            var toast = document.getElementById('toast');
+            toast.style.display = 'block';
+            setTimeout(function() {
+                toast.style.display = 'none';
+            }, 2000);
+        }
+
+        init();
+    </script>
+</body>
+</html>
